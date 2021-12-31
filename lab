@@ -1,0 +1,371 @@
+--Establish database:
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[FK_employee_employee]') and OBJECTPROPERTY(id, N'IsForeignKey') = 1)
+ALTER TABLE [dbo].[employee] DROP CONSTRAINT FK_employee_employee
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[FK_employee_department]') and OBJECTPROPERTY(id, N'IsForeignKey') = 1)
+ALTER TABLE [dbo].[employee] DROP CONSTRAINT FK_employee_department
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[FK_department_employee]') and OBJECTPROPERTY(id, N'IsForeignKey') = 1)
+ALTER TABLE [dbo].[department] DROP CONSTRAINT FK_department_employee
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[FK_dept_locations_department]') and OBJECTPROPERTY(id, N'IsForeignKey') = 1)
+ALTER TABLE [dbo].[dept_locations] DROP CONSTRAINT FK_dept_locations_department
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[FK_project_department]') and OBJECTPROPERTY(id, N'IsForeignKey') = 1)
+ALTER TABLE [dbo].[project] DROP CONSTRAINT FK_project_department
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[FK_works_on_employee]') and OBJECTPROPERTY(id, N'IsForeignKey') = 1)
+ALTER TABLE [dbo].[works_on] DROP CONSTRAINT FK_works_on_employee
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[FK_works_on_project]') and OBJECTPROPERTY(id, N'IsForeignKey') = 1)
+ALTER TABLE [dbo].[works_on] DROP CONSTRAINT FK_works_on_project
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[FK_dependent_employee]') and OBJECTPROPERTY(id, N'IsForeignKey') = 1)
+ALTER TABLE [dbo].[dependent] DROP CONSTRAINT FK_dependent_employee
+GO
+
+
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[employee]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
+drop table [dbo].[employee]
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[department]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
+drop table [dbo].[department]
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[dept_locations]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
+drop table [dbo].[dept_locations]
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[project]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
+drop table [dbo].[project]
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[works_on]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
+drop table [dbo].[works_on]
+GO
+
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[dependent]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
+drop table [dbo].[dependent]
+GO
+
+
+CREATE TABLE [dbo].[employee] (
+	[fname]   varchar(15) NOT NULL ,
+	[minit]   varchar(1),
+    [lname]   varchar(15) not null,
+    [ssn]     char(9) NOT NULL,
+    [bdate]   date,
+    [address]  varchar(50),
+    [sex]     char,
+    [salary]   numeric(10,2),
+    [superssn] char(9),
+    [dno]      int
+) ON [PRIMARY]
+GO
+
+CREATE TABLE [dbo].[department] (
+	[dname]    varchar(25) not null,
+    [dnumber]  int NOT NULL, 
+    [mgrssn]   char(9) not null, 
+    [mgrstartdate] date 
+) ON [PRIMARY]
+GO
+
+CREATE TABLE [dbo].[dept_locations] (
+	[dnumber]   int NOT NULL,
+    [dlocation] varchar(15) NOT NULL 
+) ON [PRIMARY]
+GO
+
+CREATE TABLE [dbo].[project] (
+	[pname]      varchar(25) not null,
+    [pnumber]    int NOT NULL,
+    [plocation]  varchar(15),
+    [dnum]       int not null 
+) ON [PRIMARY]
+GO
+
+CREATE TABLE [dbo].[works_on] (
+	[essn]   char(9) NOT NULL,
+    [pno]    int NOT NULL,
+    [hours]  numeric(4,1) 
+) ON [PRIMARY]
+GO
+
+CREATE TABLE [dbo].[dependent] (
+	[essn]        char(9) NOT NULL,
+    [dependent_name] varchar(15) NOT NULL,
+    [sex]            char(1),
+    [bdate]          date,
+    [relationship]   varchar(8) 
+) ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[employee] WITH NOCHECK ADD 
+	CONSTRAINT [PK_employee] PRIMARY KEY  CLUSTERED 
+	(
+		[ssn]
+	)  ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[department] WITH NOCHECK ADD 
+	CONSTRAINT [PK_department] PRIMARY KEY  CLUSTERED 
+	(
+		[dnumber]
+	)  ON [PRIMARY] 
+GO
+
+ALTER TABLE [dbo].[dept_locations] WITH NOCHECK ADD 
+	CONSTRAINT [PK_dept_locations] PRIMARY KEY  CLUSTERED 
+	(
+		[dnumber],
+		[dlocation]
+	)  ON [PRIMARY] 
+GO
+
+ALTER TABLE [dbo].[project] WITH NOCHECK ADD 
+	CONSTRAINT [PK_project] PRIMARY KEY  CLUSTERED 
+	(
+		[pnumber]
+	)  ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[works_on] WITH NOCHECK ADD 
+	CONSTRAINT [PK_works_on] PRIMARY KEY  CLUSTERED 
+	(
+		[essn],
+		[pno]
+	)  ON [PRIMARY] 
+GO
+
+ALTER TABLE [dbo].[dependent] WITH NOCHECK ADD 
+	CONSTRAINT [PK_dependent] PRIMARY KEY  CLUSTERED 
+	(
+		[essn],
+		[dependent_name]
+	)  ON [PRIMARY]
+GO
+
+ALTER TABLE [dbo].[employee] ADD 
+	CONSTRAINT [FK_employee_employee] FOREIGN KEY 
+	(
+		[superssn]
+	) REFERENCES [dbo].[employee] (
+		[ssn]
+	),
+	CONSTRAINT [FK_employee_department] FOREIGN KEY 
+	(
+		[dno]
+	) REFERENCES [dbo].[department] (
+		[dnumber]
+	)
+GO
+
+ALTER TABLE [dbo].[department] ADD 
+	CONSTRAINT [FK_department_employee] FOREIGN KEY 
+	(
+		[mgrssn]
+	) REFERENCES [dbo].[employee] (
+		[ssn]
+	)
+GO
+
+ALTER TABLE [dbo].[dept_locations] ADD 
+	CONSTRAINT [FK_dept_locations_department] FOREIGN KEY 
+	(
+		[dnumber]
+	) REFERENCES [dbo].[department] (
+		[dnumber]
+	)
+GO
+
+ALTER TABLE [dbo].[project] ADD 
+	CONSTRAINT [FK_project_department] FOREIGN KEY 
+	(
+		[dnum]
+	) REFERENCES [dbo].[department] (
+		[dnumber]
+	)
+GO
+
+ALTER TABLE [dbo].[works_on] ADD 
+	CONSTRAINT [FK_works_on_employee] FOREIGN KEY 
+	(
+		[essn]
+	) REFERENCES [dbo].[employee] (
+		[ssn]
+	),
+	CONSTRAINT [FK_works_on_project] FOREIGN KEY 
+	(
+		[pno]
+	) REFERENCES [dbo].[project] (
+		[pnumber]
+	)
+GO
+
+ALTER TABLE [dbo].[dependent] ADD 
+	CONSTRAINT [FK_dependent_employee] FOREIGN KEY 
+	(
+		[essn]
+	) REFERENCES [dbo].[employee] (
+		[ssn]
+	)
+GO
+
+--
+--Data for the database:
+--
+--Data in employee table
+ 
+'James','E','Borg','888665555','10-NOV-27','450 Stone, Houston, TX','M',55000,null,1
+'Franklin','T','Wong','333445555','08-DEC-45','638 Voss, Houston, TX','M',40000,'888665555',2
+'Jennifer','S','Wallace','987654321','20-JUN-31','291 Berry, Bellaire, TX','F',43000,'888665555',1
+'Jared','D','James','111111100','10-OCT-1966','123 Peachtree, Atlanta, GA','M',85000,null,2
+'Alex','D','Freed','444444400','09-OCT-1950','4333 Pillsbury, Milwaukee, WI','M',89000,null,1
+
+
+
+--Data in department table
+
+'Research', 1, '333445555', '22-MAY-78'
+'Administration', 2, '987654321', '01-JAN-85'
+
+
+
+--Data in project table
+
+'ProductX',1,'Bellaire',1
+'ProductY',2,'Sugarland',2
+
+
+--Data in dept_locations table
+
+1,'Houston'
+2,'Stafford'
+
+
+--Data in dependent table
+
+'333445555','Alice','F','05-APR-76','Daughter'
+'333445555','Theodore','M','25-OCT-73','Son'
+'987654321','Abner','M','29-FEB-32','Spouse'
+
+
+--Data in works_on table
+
+'333445555',1, 10.0
+'333445555',2, 10.0
+'987654321',1,20.0
+'444444400',2,40.0
+
+
+
+
+--Lab 1: The purpose of this lab is to create tables for the Supplier/Consumer database and insert data into those tables using SQL commands
+
+--Question 1: Write SQL statements to insert the data into the created tables. Run SQL statements to display the data stored in the database.
+SELECT * 
+FROM employee;
+
+SELECT * 
+FROM department;
+
+SELECT *
+FROM project;
+
+SELECT *
+FROM dept_locations;
+
+SELECT *
+FROM dependent;
+
+SELECT *
+FROM works_on;
+
+
+--Lab 2: The purpose of this lab is to answer simple SQL queries and define aliases for columns in a SELECT command
+
+--Question 1: List of all consumers
+SELECT *
+FROM Tb_Consumer;
+
+--Question 2: List of names of products whose measuring units are "Pieces"
+SELECT *
+FROM Tb_Product
+WHERE MU = 'Pieces';
+
+--Question 3: List of offers ordered by price in ascending order
+SELECT *
+FROM TB_Offers
+ORDER BY Price;
+
+--Question 4: List of distinct consumer names having at least one product request
+SELECT DISTINCT Name
+FROM Tb_Consumer,
+      Tb_Requests
+WHERE Tb_Consumer.Con_ID = Tb_Requests.Con_ID;
+
+--Question 5: List consumer data and name columsn explicitly as: "Consumer Code", "Consumer Name", and "Consumer City"
+SELECT Con_ID AS 'Consumer Code',
+        Name AS 'Consumer Name',
+        City AS 'Consumer City'
+FROM Tb_Consumer;
+
+
+--Lab 3: The purpose of this lab is to answer SQL queries by joining multiple tables in the WHERE clause.
+
+--Q1: List the names of consumers requesting at least one product
+SELECT DISTINCT Tb_Consumer.Name
+FROM Tb_Consumer,
+      Tb_Requests
+WHERE Tb_Consumer.Con_ID = Tb_Requests.Con_ID;
+
+--Q2: List of products requested by at least one consumer
+SELECT DISTINCT Tb_Product.Name
+FROM Tb_Product,
+      Tb_Requests
+WHERE Tb_Requests.Prod_ID = Tb_Product.Prod_ID;
+
+--Q3: List of transactions showing supplier, consumer and product names
+SELECT Tb_Consumer.Name,
+        Tb_Supplier.Name,
+        Tb_Product.Name
+FROM Tb_Transactions,
+      Tb_Consumer,
+      Tb_Supplier,
+      Tb_PRoduct
+WHERE Tb_Transactions.Con_ID = Tb_Consumer.Con_ID
+      AND Tb_Transactions.Prod_ID = Tb_Product.Prod_ID
+      AND Tb_Transactions.Supp_ID = Tb_Supplier.Supp_ID;
+
+--Q4: List of cities where both suppliers and consumers are located
+SELECT DISTINCT Tb_Consumer.City
+FROM Tb_Consumer,
+      Tb_Supplier
+WHERE Tb_Consumer.City = Tb_Supplier.City;
+
+--Q5: List of cities with at least 2 consumers
+SELECT DISTINCT S1.city
+FROM Tb_Consumer S1,
+      Tb_Consumer S2
+WHERE S1.City = S2.City
+      AND S1.Con_ID <> S2.Con_ID;
+
+--Q6: List of products that are offered by at least one supplier from Chicago
+SELECT DISTINCT Tb_Product.Name
+FROM Tb_Product,
+      Tb_Supplier,
+      TB_Offers
+WHERE TB_Offers.Supp_ID = Tb_Supplier.Supp_ID
+      AND TB_Offers.Prod_ID = Tb_Product.Prod_ID
+      AND City = 'Chicago';
+
